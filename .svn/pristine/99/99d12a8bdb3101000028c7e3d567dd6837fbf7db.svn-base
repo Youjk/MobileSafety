@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical" >
+    
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:gravity="center"
+        android:text="功能列表"
+        android:textSize="22sp"
+        android:layout_gravity="center_horizontal"
+        android:textColor="#000000"
+        android:background="#8866ff00"
+        />
+
+    <com.yjk.mobilesafety.ui.FocusedTextView
+    	android:layout_marginTop="15dp"
+    	android:ellipsize="marquee"
+	    android:singleLine="true"
+	    android:textSize="18sp"
+	    android:text="坤哥专属手机卫士，守护您的手机，让您用的放心，记得好评哦!!"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    />
+    	
+    <GridView 
+        android:layout_marginTop="15dp"
+        android:verticalSpacing="30dp"
+        android:numColumns="3"
+        android:id="@+id/list_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        
+    </GridView>
+</LinearLayout>

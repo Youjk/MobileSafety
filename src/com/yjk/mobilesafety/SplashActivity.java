@@ -1,0 +1,393 @@
+package com.yjk.mobilesafety;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import net.tsz.afinal.FinalHttp;
+import net.tsz.afinal.http.AjaxCallBack;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.yjk.mobilesafety.utils.StreamTools;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.BitmapFactory;
+import android.media.MediaCodec.BufferInfo;
+import android.net.Uri;
+import android.opengl.Visibility;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.animation.AlphaAnimation;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+/**
+ * splash页面，展示Logo，检测更新，数据初始化
+ * @author yjk
+ *
+ */
+public class SplashActivity extends Activity {
+
+	protected static final String TAG = "SplashActivity";
+	protected static final int ENTER_HOME = 0;
+	protected static final int SHOW_UPDATE_DIALOG = 1;
+	protected static final int URL_ERROR = 2;
+	protected static final int NETWORK_ERROR = 3;
+	protected static final int JSON_ERROR = 4;
+	private TextView tv_splash_version;
+	private String desprition; //新版本描述信息
+	private String apkUrl;  //新版本apk下载地址
+	private TextView tv_update_info;
+	
+	private SharedPreferences sp;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.activity_splash);
+		
+		sp = getSharedPreferences("config", MODE_PRIVATE);
+		tv_splash_version = (TextView) findViewById(R.id.tv_splash_version);
+		tv_splash_version.setText("版本号" + getVersionName());
+		tv_update_info = (TextView) findViewById(R.id.tv_update_info);
+		
+		//拷贝数据库
+		copyDB("address.db");
+		copyDB("antivirus.db");
+		
+		boolean update = sp.getBoolean("update", false);
+		if(update){
+			//检查升级
+			checkUpdate();
+		}else{
+			hander.postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					enterHome();
+				}
+			}, 2000);
+		}
+		
+		//渐隐动画
+		AlphaAnimation aa = new AlphaAnimation(0.2f, 1.0f);
+		aa.setDuration(1000);
+		findViewById(R.id.splash_root).setAnimation(aa);
+		
+		//创建快捷图标
+		installShortCut();
+	}
+
+	/**
+	 * 创建快捷方式
+	 */
+	private void installShortCut() {
+		// TODO Auto-generated method stub
+		boolean shortcut = sp.getBoolean("shortcut", false);
+		if(shortcut){
+			return;
+		}
+		
+		Intent intent = new Intent();
+		intent.setAction("com.android.launcher.action.INSTALL_SHORTCUT");
+		//快捷方式 包含3个重要消息 1、名称 2 图标 3干什么事
+		intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, "手机卫士");
+		intent.putExtra(intent.EXTRA_SHORTCUT_ICON, 
+				BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher));
+		Intent shortcutIntent = new Intent();
+		shortcutIntent.setAction("android.intent.action.MAIN");
+		shortcutIntent.addCategory("android.intent.category.LAUNCHER");
+		shortcutIntent.setClass(SplashActivity.this, SplashActivity.class);
+		
+		intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcutIntent);
+		
+		sendBroadcast(intent);
+		
+		Editor editor = sp.edit();
+		editor.putBoolean("shortcut", true);
+		editor.commit();
+	}
+
+
+	/**
+	 * 将assert中数据库拷贝至data/data/包名/files/目录下
+	 * @param dbname
+	 */
+	private void copyDB(String dbname) {
+		// TODO Auto-generated method stub
+		//只要拷贝了一次就不用拷贝
+		try{
+			File file = new File(getFilesDir(), dbname);
+			//如果已经拷贝过了，就不需要在拷贝
+			if(file.exists() && file.length() > 0){
+				return;
+			}
+			InputStream is = getAssets().open(dbname);
+			FileOutputStream fos = new FileOutputStream(file);
+			byte[] buffer = new byte[1024];
+			int len = 0;
+			while((len = is.read(buffer)) != -1){
+				fos.write(buffer, 0, len);
+			}
+			fos.flush();
+			is.close();
+			fos.close();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+
+	private Handler hander = new Handler(){
+		public void handleMessage(Message msg) {
+			switch(msg.what){
+			case SHOW_UPDATE_DIALOG:
+				Log.d(TAG, "显示升级对话框");
+				showUpdateDialog();
+				//enterHome();
+				break;
+			case ENTER_HOME:
+				enterHome();
+				break;
+			case URL_ERROR:
+				enterHome();
+				Toast.makeText(SplashActivity.this, "URL错误", Toast.LENGTH_LONG).show();
+				break;
+			case NETWORK_ERROR:
+				enterHome();
+				Toast.makeText(SplashActivity.this, "服务器连接失败", Toast.LENGTH_LONG).show();
+				break;
+			case JSON_ERROR:
+				enterHome();
+				Toast.makeText(SplashActivity.this, "JSON解析错误", Toast.LENGTH_LONG).show();
+				break;	
+			default:
+				break;
+			
+			}
+		}
+	};
+	
+	/**
+	 * 弹出升级对话框
+	 */
+	private void showUpdateDialog() {
+		// TODO Auto-generated method stub
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("提示升级");
+		//builder.setCancelable(false);  //不能取消对话框
+		//如果取消对话框则直接进入主界面
+		builder.setOnCancelListener(new OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				// TODO Auto-generated method stub
+				enterHome();
+				dialog.dismiss();
+			}
+		});
+		builder.setMessage(desprition);
+		
+		builder.setPositiveButton("立刻升级", new OnClickListener() {
+			
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				//下载APK，并且替换安装
+				if(Environment.getExternalStorageState().
+						equals(Environment.MEDIA_MOUNTED)){
+					//sdcard存在
+					FinalHttp finalhttp = new FinalHttp();
+					finalhttp.download(apkUrl, Environment.getExternalStorageDirectory()
+							.getAbsolutePath() + "/mobilesafe2.0apk", new AjaxCallBack<File>() {
+								@Override
+								public void onFailure(Throwable t, int errorNo,
+										String strMsg) {
+									// TODO Auto-generated method stub
+									t.printStackTrace();
+									Toast.makeText(getApplicationContext(), 
+											"下载失败", Toast.LENGTH_LONG);
+									super.onFailure(t, errorNo, strMsg);
+								}
+								
+								@Override
+								public void onLoading(long count, long current) {
+									// TODO Auto-generated method stub
+									super.onLoading(count, current);
+									//当前下载百分比
+									tv_update_info.setVisibility(View.VISIBLE);
+									int progress = (int) (current * 100/count);
+									tv_update_info.setText("下载进度" +progress + "%");
+								}
+								
+								@Override
+								public void onSuccess(File t) {
+									// TODO Auto-generated method stub
+									super.onSuccess(t);
+									installApk(t);
+								}
+
+								/*
+								 * 安装apk
+								 * @param t
+								 */
+								private void installApk(File t) {
+									// TODO Auto-generated method stub
+									Intent intent = new Intent();
+									intent.setAction(Intent.ACTION_VIEW);
+									intent.addCategory(Intent.CATEGORY_DEFAULT);
+									intent.setDataAndType(Uri.fromFile(t), 
+											"application/vnd.android.package-archive");
+									
+									startActivity(intent);
+								}
+							});
+				}else{
+					Toast.makeText(getApplicationContext(), 
+							"没有Sd卡，请装上在试", Toast.LENGTH_LONG)
+							.show();
+				}
+			}
+		});
+		
+		builder.setNegativeButton("下次再说", new OnClickListener(){
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				dialog.dismiss();
+				enterHome(); 
+			}
+			
+		});
+		
+		builder.show();
+	}
+	
+	/**
+	 * 进入主页面
+	 */
+	private void enterHome() {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(this, HomeActivity.class);
+		startActivity(intent);
+		finish();
+	};
+	
+	
+	/**
+	 * 检查是否有新版本
+	 */
+	private void checkUpdate() {
+		// TODO Auto-generated method stub
+		new Thread(){
+			public void run() {
+				//URLhttp:// http://192.168.1.101:8080/updateinfo.html
+				Message msg = Message.obtain();
+				
+				long startTime = System.currentTimeMillis();
+				try {
+					URL url = new URL(getString(R.string.servelurl));
+					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+					conn.setRequestMethod("GET");
+					conn.setConnectTimeout(4000);
+					int code = conn.getResponseCode();
+					Log.d("debuge", "" + code);
+					if(code == 200){
+						String result = StreamTools.readFromStream(conn.getInputStream());
+						Log.d("debuge", result);
+						JSONObject obj = new JSONObject(result);
+						//得到服务器的版本信息
+						String version = (String) obj.get("version");
+						desprition = (String) obj.get("description");
+						apkUrl = (String) obj.get("apkurl");
+						
+						//校验是否有新版本
+						if(version.equals(getVersionName())){
+							//版本一致，没有新版本，进入主页面
+							msg.what = ENTER_HOME;
+							//Log.d(TAG, "ENTER_HOME");
+						}else{
+							//有新版本，弹出升级对话框
+							msg.what = SHOW_UPDATE_DIALOG;
+							//Log.d(TAG, "SHOW_UPDATE_DIALOG");
+						}
+							
+					}
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					msg.what = URL_ERROR;
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					msg.what = NETWORK_ERROR;
+					e.printStackTrace();
+				}catch (JSONException e) {
+					// TODO Auto-generated catch block
+					msg.what= JSON_ERROR;
+					e.printStackTrace();
+				}finally{
+					
+					long endTime = System.currentTimeMillis();
+					//我们花了多少时间
+					long dTime = endTime - startTime;
+					//睡2000毫秒
+					if(dTime < 2000){
+						try {
+							Thread.sleep(2000 - dTime);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					hander.sendMessage(msg);
+				}
+			};
+		}.start();
+	}
+
+	/**
+	 * 得到应用程序的版本名称
+	 */
+	private String getVersionName(){
+		//用来管理手机的APK
+		PackageManager pm = getPackageManager();
+		//得到指定apk的功能清单文件
+		try {
+			PackageInfo info = pm.getPackageInfo("com.yjk.mobilesafety", 0);
+			return info.versionName;
+		} catch (NameNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return "";
+		}
+	}
+}

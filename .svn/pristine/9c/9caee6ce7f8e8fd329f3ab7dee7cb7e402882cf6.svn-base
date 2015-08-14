@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:gravity="center"
+        android:text="手机杀毒"
+        android:textSize="22sp"
+        android:textColor="#000000"
+        android:background="#8866ff00"
+        />  
+        
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        >
+        
+        <FrameLayout 
+            android:layout_width="80dp"
+			android:layout_height="80dp"
+            >
+            
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_scanner_malware" />
+            
+            <ImageView
+                android:id="@+id/iv_scan"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/act_scanning_03" />
+            
+        </FrameLayout>
+        
+        
+        <LinearLayout 
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            >
+            
+            <Button 
+                android:id="@+id/btn_scan"
+                android:onClick="startScanVirtus"
+                android:text="全盘扫描"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+            
+            <ProgressBar 
+                style="@style/my_pb_style"
+                android:id="@+id/pb_atvirtu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="10dp"
+                />      
+        </LinearLayout> 
+    </LinearLayout>
+    
+    <TextView 
+        android:id="@+id/tv_scan_status"
+        android:layout_marginLeft="90dp"
+        android:text=""
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:gravity="center"
+        />
+    
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="0.2dp"
+        android:layout_marginTop="10dp"
+        android:background="#000000"
+        />
+    
+    <LinearLayout 
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/ll_container"
+        android:orientation="vertical"
+        >
+        
+    </LinearLayout>
+</LinearLayout>

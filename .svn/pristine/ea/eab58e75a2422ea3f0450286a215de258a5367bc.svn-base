@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView 
+        style="@style/TextView_title"
+        android:text="软件管理"
+        />
+    
+    <RelativeLayout 
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        
+        <TextView 
+            android:layout_marginLeft="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_neicun_left"
+            android:text="内存可用"
+            android:layout_alignParentLeft="true"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            />
+        
+         <TextView 
+             android:layout_marginRight="5dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_sdcard_left"
+            android:text="sd卡可用"
+            android:layout_alignParentRight="true"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            />
+        
+    </RelativeLayout>
+    
+    <FrameLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        >
+        
+        <LinearLayout 
+            android:id="@+id/ll_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+			android:visibility="invisible"
+            >
+            
+            <ProgressBar 
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                />
+            
+            <TextView 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="正在加载应用列表"
+                />
+            
+        </LinearLayout>
+        
+        <ListView
+            android:fastScrollEnabled="true"
+            android:id="@+id/lv_software_item"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+            
+        </ListView>
+        
+        <TextView 
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="用户程序:6个"
+            android:textColor="#ffffff"
+            android:background="#ff888888"
+            android:textSize="20sp"
+            android:visibility="invisible"
+            />
+    </FrameLayout>
+    
+   
+</LinearLayout>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" 
+    android:gravity="center"
+    android:background="#ffffff"
+    >
+    
+
+    <TextView 
+        android:background="#66f660"
+        android:textColor="#000000"
+        android:gravity="center"
+        android:text="输入密码"
+        android:textSize="22sp"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        />
+    
+    <EditText 
+        android:id="@+id/et_enter_pwd"
+        android:layout_marginTop="10dp"
+        android:layout_width="280dp"
+        android:layout_height="wrap_content"
+        android:hint="请输入密码"
+        android:inputType="textPassword"
+        />
+    
+   
+     <LinearLayout 
+         android:layout_marginTop="5dp"
+         android:layout_width="300dp"
+         android:layout_height="wrap_content"
+         android:gravity="center"
+         android:orientation="horizontal"
+         >
+         
+         <Button 
+             android:id="@+id/ok"
+             android:layout_width="140dp"
+             android:layout_height="wrap_content"
+             android:text="确定"
+             />
+         
+         <Button 
+             android:id="@+id/cancel"
+             android:layout_width="140dp"
+             android:layout_height="wrap_content"
+             android:text="取消"
+             />
+         
+     </LinearLayout>
+    
+</LinearLayout>

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.yjk.mobilesafety"
+    android:installLocation="preferExternal"
+    android:versionCode="3"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="9"
+        android:targetSdkVersion="14" />
+    
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+	<uses-permission android:name="android.permission.READ_CONTACTS"/>
+	<uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
+	<uses-permission android:name="android.permission.READ_SMS"></uses-permission>
+	<uses-permission android:name="android.permission.RECEIVE_SMS"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+	<uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"/>
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+	<uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS"/>
+	<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+	<uses-permission android:name="android.permission.CALL_PHONE"/>
+	<uses-permission android:name="android.permission.READ_CALL_LOG"/>
+	<uses-permission android:name="android.permission.WRITE_CALL_LOG"/>
+	<uses-permission android:name="android.permission.READ_SMS"/>
+	<uses-permission android:name="android.permission.WRITE_SMS"/>
+	<uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+	 <!-- 添加快捷方式 -->
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
+    <!-- 移除快捷方式 -->
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT" />
+    <!-- 查询快捷方式 -->
+    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS" />
+	<uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES"/>
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+	<uses-permission android:name="android.permission.GET_PACKAGE_SIZE"/>
+	<uses-permission android:name="android.permission.DELETE_CACHE_FILES"/>
+	<uses-permission android:name="android.permission.CLEAR_APP_CACHE"/>
+    
+	
+	 <instrumentation
+        android:name="android.test.InstrumentationTestRunner"
+        android:targetPackage="com.yjk.mobilesafety" />
+	
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        
+        <uses-library android:name="android.test.runner" />
+        
+        <activity
+            android:name=".SplashActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.HomeActivity">
+            
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.SettingActivity"
+            >
+            
+        </activity>
+        
+        
+        <activity
+            android:name="com.yjk.mobilesafety.LostFindActivity"
+            >
+            
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.SetUp1Activity"
+            >   
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.SetUp2Activity"
+            >   
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.SetUp3Activity"
+            >   
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.SetUp4Activity"
+            >   
+        </activity>
+        
+        <activity 
+           android:name="com.yjk.mobilesafety.NumberQueryActivity"
+            >
+            
+        </activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.TrafficStatsActivity"
+            ></activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.AToolActivity"
+            ></activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.CallSmsSafeActivity"
+            ></activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.AppManagerActivity"
+            ></activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.TaskManagerActivity"
+            ></activity>
+        
+        <activity android:name="com.yjk.mobilesafety.TaskSettingActivity"></activity>
+        <activity android:name="com.yjk.mobilesafety.EnterPwdActivity"
+            android:launchMode="singleInstance"
+            android:excludeFromRecents="true"
+            ></activity>
+        
+        <activity 
+            android:name="com.yjk.mobilesafety.AntiVirusActivity"
+            ></activity>
+        
+        <activity android:name="com.yjk.mobilesafety.CleanCacheActivity"></activity>
+        
+        <receiver 
+            android:name="com.yjk.mobilesafety.receiver.BootCompeleteReceiver"
+            >
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+        
+        <receiver 
+            android:name="com.yjk.mobilesafety.receiver.SMSReceiver"
+            android:permission="android.permission.BROADCAST_SMS"
+            >
+            <intent-filter android:priority="1000">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+        
+        <receiver
+            android:name="com.yjk.mobilesafety.receiver.killAllReceiver"
+             >
+            <intent-filter >
+                <action android:name="com.yjk.mobilesafety.killall"/>
+            </intent-filter>
+        </receiver>
+        
+        
+        <service 
+            android:name="com.yjk.mobilesafety.service.GPSService"
+            >
+        </service>
+        
+        <service android:name="com.yjk.mobilesafety.service.CallSmsSafeService"></service>
+        
+        <receiver
+            android:name="com.yjk.mobilesafety.receiver.MyAdmin"
+            android:description="@string/sample_device_admin_description"
+            android:label="@string/sample_device_admin"
+            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_sample" />
+
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
+        
+        <receiver android:name="com.yjk.mobilesafety.receiver.MyWidgeReceiver">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/process_widget_provider" />
+        </receiver>
+        
+       <service android:name="com.yjk.mobilesafety.service.MyAddressService"></service>
+       <service android:name="com.yjk.mobilesafety.service.AutoCleanService"></service>     
+       <service android:name="com.yjk.mobilesafety.service.updateWidgeService"></service>
+       <service android:name="com.yjk.mobilesafety.service.watchDogService"></service>
+       
+    </application>
+
+</manifest>

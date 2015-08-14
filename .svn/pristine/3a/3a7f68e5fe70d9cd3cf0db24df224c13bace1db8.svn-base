@@ -1,0 +1,341 @@
+package com.yjk.mobilesafety;
+
+import org.w3c.dom.ls.LSInput;
+
+import com.yjk.mobilesafety.utils.Md5Utils;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class HomeActivity extends Activity {
+	
+	protected static final String TAG = "HomeActivity";
+	private GridView list_home;
+	private MyAdapter adapter;
+	private SharedPreferences sp;
+	private static String[] names = {
+		"手机防盗", "通讯卫士", "软件管理",
+		"进程管理", "流量统计", "手机杀毒",
+		"缓存清理", "高级工具", "设置中心"
+	};
+	
+	private static int ids[] = {
+		R.drawable.safe, R.drawable.callmsgsafe, R.drawable.app,
+		R.drawable.taskmanager, R.drawable.netmanager, R.drawable.trojan,
+		R.drawable.sysoptimize, R.drawable.atools, R.drawable.settings
+	};
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.activity_home);
+		
+		sp = getSharedPreferences("config", MODE_PRIVATE);
+		adapter = new MyAdapter();
+		list_home = (GridView) findViewById(R.id.list_home);
+		list_home.setAdapter(adapter);
+		
+		list_home.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				switch(position){
+				case 0: //进入手机防盗页面
+					showLostFindDialog();
+					break;
+					
+				case 1: //进入通讯卫士
+				{
+					Intent intent = new Intent(HomeActivity.this, CallSmsSafeActivity.class);
+					startActivity(intent);
+				}
+					break;
+					
+				case 2: //进入软件管理器
+				{
+					Intent intent = new Intent(HomeActivity.this, AppManagerActivity.class);
+					startActivity(intent);
+				}
+					break;
+				case 3: //进入进程管理器
+				{
+					Intent intent = new Intent(HomeActivity.this, TaskManagerActivity.class);
+					startActivity(intent);
+				}
+					break;
+					
+				case 4: //流量统计
+				{
+					Intent intent = new Intent(HomeActivity.this, TrafficStatsActivity.class);
+					startActivity(intent);
+				}
+				
+				break;
+				
+				case 5: //手机杀毒
+				{
+					Intent intent = new Intent(HomeActivity.this, AntiVirusActivity.class);
+					startActivity(intent);
+				}
+				
+				break;
+				
+				case 6:
+				{
+					Intent intent = new Intent(HomeActivity.this, CleanCacheActivity.class);
+					startActivity(intent);
+				}
+					break;
+				
+				case 7:
+				{
+					Intent intent = new Intent(HomeActivity.this, AToolActivity.class);
+					startActivity(intent);
+				}
+					break;
+					
+				case 8:  //进入设置页面
+				{
+					Intent intent = new Intent(HomeActivity.this, SettingActivity.class);
+					startActivity(intent);
+				}
+				
+					break;
+				
+				default:
+					
+					break;
+				}
+			}
+		});
+	}
+	
+	
+	protected void showLostFindDialog() {
+		// 判断是否设置过密码
+		if(isSteupPwd()){
+			//已经设置密码，弹出的是输入对话框
+			showEnterDialog();
+		}else{
+			//没有设置密码，弹出的是设置密码的对话框
+			showStepPwdDialog();
+		}
+		
+	}
+
+	
+	private EditText et_setup_pwd;
+	private EditText et_setup_confirm;
+	private Button ok;
+	private Button cancel;
+	private AlertDialog dialog;
+	/*
+	 * 设置密码对话框
+	 */
+	private void showStepPwdDialog() {
+		// TODO Auto-generated method stub
+		AlertDialog.Builder builder = new Builder(this);
+		//自定义一个布局文件
+		View view = View.inflate(this,
+				R.layout.dialog_steup_password, null);
+		et_setup_pwd = (EditText) view.findViewById(R.id.et_setup_pwd);
+		et_setup_confirm = (EditText) view.findViewById(R.id.et_setup_confirm);
+		ok = (Button) view.findViewById(R.id.ok);
+		cancel = (Button) view.findViewById(R.id.cancel);
+		
+		
+		dialog = builder.create();
+		dialog.setView(view, 0, 0, 0, 0);
+		dialog.show();
+		
+		cancel.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				dialog.dismiss();
+			}
+		});
+		
+		ok.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				String pwd = et_setup_pwd.getText().toString().trim();
+				String pwdConfirm = et_setup_confirm.getText().toString().trim();
+				
+				if(TextUtils.isEmpty(pwd)){
+					//密码为空
+					Toast.makeText(HomeActivity.this, 
+							"请输入密码", Toast.LENGTH_LONG).show();
+					return;
+				}
+				else{
+					//密码不为空
+					if(TextUtils.isEmpty(pwdConfirm)){
+						//确认密码为空
+						Toast.makeText(HomeActivity.this, 
+								"请输入确认密码", Toast.LENGTH_LONG).show();
+						return;
+					}
+					else{
+						//确认密码不为空，且两次密码一样
+						if(pwd.equals(pwdConfirm)){
+							Editor editor = sp.edit();
+							editor.putString("password", Md5Utils.md5Password(pwd));
+							editor.commit();
+							
+							enterLostFind();
+							dialog.dismiss();
+							
+							Log.d(TAG, "进入防盗页面");
+							return;
+						}else{
+							//两次密码不一样
+							Toast.makeText(HomeActivity.this, 
+									"两次密码不一致", Toast.LENGTH_LONG).show();
+							
+							return;
+						}
+					}
+				}
+			}
+		});
+		
+	}
+
+
+	protected void enterLostFind() {
+		// TODO Auto-generated method stub
+		Intent intent = new Intent(HomeActivity.this, LostFindActivity.class);
+		startActivity(intent);
+	}
+
+
+	/*
+	 * 输入密码对话框
+	 */
+	private void showEnterDialog() {
+		// TODO Auto-generated method stub
+		AlertDialog.Builder builder = new Builder(this);
+		//自定义一个布局文件
+		View view = View.inflate(this,
+				R.layout.dialog_enter_password, null);
+		et_setup_pwd = (EditText) view.findViewById(R.id.et_enter_pwd);
+		ok = (Button) view.findViewById(R.id.ok);
+		cancel = (Button) view.findViewById(R.id.cancel);
+		
+		dialog = builder.create();
+		dialog.setView(view, 0, 0, 0, 0);
+		dialog.show();
+		
+		cancel.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				dialog.dismiss();
+			}
+		});
+		
+		ok.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				String password =  et_setup_pwd.getText().toString().trim();
+				
+				String savedPasseord = sp.getString("password", "");
+				
+				if(TextUtils.isEmpty(password)){
+					Toast.makeText(HomeActivity.this, 
+							"请输入密码", Toast.LENGTH_LONG).show();
+					return;
+				}
+				
+				if(!Md5Utils.md5Password(password).equals(savedPasseord)){
+					et_setup_pwd.setText("");
+					Toast.makeText(HomeActivity.this, 
+							"密码错误，请再次输入", Toast.LENGTH_LONG).show();
+					return;
+				}else{
+					enterLostFind();
+					
+					dialog.dismiss();
+					return;
+				}
+			}
+		});
+		
+	}
+
+
+	/*
+	 * 判断是否设置过密码
+	 */
+	private boolean isSteupPwd(){
+		String password = sp.getString("password", "");
+		
+		return !TextUtils.isEmpty(password);
+		
+	}
+
+	private class MyAdapter extends BaseAdapter{
+
+		@Override
+		public int getCount() {
+			// TODO Auto-generated method stub
+			return names.length;
+		}
+
+		@Override
+		public Object getItem(int position) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public long getItemId(int position) {
+			// TODO Auto-generated method stub
+			return 0;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			View view = View.inflate(HomeActivity.this, R.layout.list_item_home, null);
+			ImageView iv = (ImageView) view.findViewById(R.id.iv_item);
+			iv.setImageResource(ids[position]);
+			TextView tv = (TextView) view.findViewById(R.id.tv_item);
+			tv.setText(names[position]);
+			return view;
+		}
+		
+	}
+}
